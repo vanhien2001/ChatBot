@@ -1,7 +1,21 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+    faPaperPlane,
+    faSpinner,
+    faTrash,
+    faCheck,
+    faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
-import { conversationSelector } from "../../store/reducers/conversationSlice";
+import { userSelector } from "../../store/reducers/userSlice";
+import {
+    conversationSelector,
+    deleteConversation,
+    setConversation,
+    getAll as getAllConversations,
+} from "../../store/reducers/conversationSlice";
 import {
     messageSelector,
     getAll,
@@ -16,9 +30,13 @@ const timeAgo = new TimeAgo("en-US");
 const ChatContainer = () => {
     const ref = useRef<HTMLInputElement>(null);
     const dispatch = useAppDispatch();
-    const { conversationId } = useAppSelector(conversationSelector);
+    const { user } = useAppSelector(userSelector);
+    const { conversationId, conversations } =
+        useAppSelector(conversationSelector);
     const { messageLoading, messages } = useAppSelector(messageSelector);
     const [text, setText] = useState<string>("");
+    const [botLoading, setBotLoading] = useState<Boolean>(false);
+    const [showConfirm, setShowConfirm] = useState<Boolean>(false);
 
     const sendMessage = (text: string) => {
         setText("");
@@ -30,7 +48,10 @@ const ChatContainer = () => {
             })
         )
             .then(() => dispatch(getAll(conversationId)))
-            .then(() => setText('Green will response you soon ....'))
+            .then(() => {
+                setText("Green will response you soon ....");
+                setBotLoading(true);
+            })
             .then(() =>
                 dispatch(
                     requestBot({
@@ -41,16 +62,80 @@ const ChatContainer = () => {
                 )
             )
             .then(() => dispatch(getAll(conversationId)))
-            .then(() => setText(''))
+            .then(() => {
+                setText("");
+                setBotLoading(false);
+            });
+    };
+
+    const onDelete = () => {
+        dispatch(deleteConversation(conversationId))
+            .then(() => dispatch(setConversation("")))
+            .then(() =>
+                dispatch(getAllConversations(user?._id ? user._id : ""))
+            );
     };
 
     useEffect(() => {
-        ref.current?.scrollIntoView({ behavior: 'smooth' });
-    }, [messages]);
+        setShowConfirm(false);
+    }, [conversationId]);
+
+    useEffect(() => {
+        ref.current?.scrollIntoView({ behavior: "smooth" });
+    }, [messages, botLoading]);
 
     return (
-        <div className="bg-input_back h-screen p-5 pr-0 flex flex-col bg-[url('https://doot-light.react.themesbrand.com/static/media/pattern-05.ffd181cd.png')]">
-            <div className="flex-1 flex flex-col overflow-y-auto pr-5">
+        <div className="bg-input_back h-screen pr-0 flex flex-col bg-[url('https://doot-light.react.themesbrand.com/static/media/pattern-05.ffd181cd.png')]">
+            {conversationId ? (
+                <div className="px-10 py-5 text-text_color border-solid border-b-2 border-text_color2 chat flex items-center justify-between">
+                    <div className="text-text_color3">
+                        {
+                            conversations.find(
+                                (index) => index._id == conversationId
+                            )?.name
+                        }
+                    </div>
+                    <div className="flex items-center">
+                        {showConfirm ? (
+                            <>
+                                <FontAwesomeIcon
+                                    title="Confirm"
+                                    icon={faCheck}
+                                    className="mr-3 cursor-pointer hover:text-green text-lg"
+                                    onClick={() => onDelete()}
+                                />
+                                <FontAwesomeIcon
+                                    title="Cancel"
+                                    icon={faXmark}
+                                    className="mr-5 cursor-pointer hover:text-red text-lg"
+                                    onClick={() => setShowConfirm(false)}
+                                />
+                            </>
+                        ) : (
+                            ""
+                        )}
+                        <div
+                            title="Delete"
+                            onClick={() => setShowConfirm(true)}
+                            className="rounded-full w-7 h-7 flex items-center justify-center text-text_color2 cursor-pointer hover:bg-red hover:text-text_color3"
+                        >
+                            <FontAwesomeIcon icon={faTrash} />
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                ""
+            )}
+            <div className="flex-1 flex flex-col overflow-y-auto px-5 border-solid border-b-2 border-text_color2">
+                {!conversationId ? (
+                    <div className="px-10 py-5 text-text_color h-full flex items-center justify-center">
+                        <div className="">
+                            Select or create conversation to chat with Green
+                        </div>
+                    </div>
+                ) : (
+                    ""
+                )}
                 {messages.map((message, index) => {
                     if (message.bot) {
                         return (
@@ -89,7 +174,7 @@ const ChatContainer = () => {
                                 ref={ref}
                             >
                                 <img
-                                    src="/green-logo.png"
+                                    src="/avatar.png"
                                     alt=""
                                     className="h-6 w-6 rounded-full ml-5"
                                 />
@@ -116,21 +201,62 @@ const ChatContainer = () => {
                         );
                     }
                 })}
+                {botLoading ? (
+                    <div className="flex mb-5" ref={ref}>
+                        <img
+                            src="/green-logo.png"
+                            alt=""
+                            className="h-6 w-6 rounded-full mr-5"
+                        />
+                        <div className="w-8/12">
+                            <div className=" text-text_color text-xs font-bold">
+                                ChatBot Green
+                            </div>
+                            <div className="flex">
+                                <div className="bg-input_bac text-text_color rounded-md p-3 my-2 botResponse animate-pulse">
+                                    <FontAwesomeIcon
+                                        icon={faSpinner}
+                                        className="animate-spin mr-2"
+                                    />
+                                    Processing...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ) : (
+                    ""
+                )}
             </div>
-            <div className=" h-16 border-solid border-t-2 border-text_color2 flex justify-center items-center">
+            <div className="h-24 flex justify-center items-center chat">
                 <input
                     type="text"
-                    className={`text-text_color2 bg-input_bac w-10/12 px-5 py-2 rounded-md outline-none border-solid border-2 border-input_back focus:border-green ${messageLoading ? 'cursor-not-allowed' : ''}`}
+                    className={`text-text_color2 bg-input_bac w-10/12 px-5 py-2 rounded-md outline-none border-solid border-2 border-input_back focus:border-green ${
+                        messageLoading || !conversationId
+                            ? "cursor-not-allowed"
+                            : ""
+                    }`}
                     placeholder="Chat Some Thing"
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    disabled={messageLoading}
+                    disabled={messageLoading || !conversationId}
                 />
                 <button
-                    className={`text-text_color w-20 rounded-md bg-green2 h-10 ml-5 hover:opacity-90 ${messageLoading ? 'cursor-not-allowed' : ''}`}
+                    className={`text-text_color w-20 rounded-md bg-green2 h-10 ml-5 hover:bg-green hover:text-text_color3 ${
+                        messageLoading || !conversationId
+                            ? "cursor-not-allowed"
+                            : ""
+                    }`}
+                    disabled={messageLoading || !conversationId}
                     onClick={() => sendMessage(text)}
                 >
-                    Send
+                    {messageLoading ? (
+                        <FontAwesomeIcon
+                            icon={faSpinner}
+                            className="animate-spin"
+                        />
+                    ) : (
+                        <FontAwesomeIcon icon={faPaperPlane} />
+                    )}
                 </button>
             </div>
         </div>

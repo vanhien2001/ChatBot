@@ -4,6 +4,7 @@ module.exports = {
     theme: {
         extend: {},
         colors: {
+            red: "#b80f0f",
             green: "#4eac6d",
             green2: "#354b3c",
             bg_back: "#262626",
@@ -11,6 +12,7 @@ module.exports = {
             input_bac: "#333333",
             text_color: "#adb5bd",
             text_color2: "#8f9198",
+            text_color3: "#ffffff",
         }
     },
     plugins: [],

@@ -5,20 +5,20 @@ const mongoose = require('mongoose');
 class MessageController {
     async showAll(req, res) {
         try {
-            const conversationId = req.query.userId || null
+            const conversationId = req.query.conversationId || null
             let messages
             if(conversationId){
                 messages = await Message.aggregate([
                     {
                         $match: {
-                            conversation: mongoose.Types.ObjectId(conversationId)
+                            conversationId: mongoose.Types.ObjectId(conversationId)
                         }
                     }
                 ])
             }else{
                 messages = await Message.find({})
             }
-            res.json({ success: true, messages, filter })
+            res.json({ success: true, messages})
         } catch (error) {
             res.status(500).json({ success: false, messages: 'Interval server error' })
         }
@@ -38,6 +38,16 @@ class MessageController {
 
     async store(req, res) {
         try {
+            const message = new Message(req.body)
+            await message.save()
+            res.json({ success: true, messages: "Send message successfully" })
+        } catch (error) {
+            res.status(500).json({ success: false, messages: error.message })
+        }
+    }
+
+    async botReponse(req, res) {
+        try {
             let responseMessage
             const { conversationId, text } = req.body;
             const messages = await Message.aggregate([
@@ -47,8 +57,6 @@ class MessageController {
                     }
                 }
             ])
-            const message = new Message(req.body)
-            await message.save()
             await ChatGPTService.generateCompletion(text, messages).then(async responseMsg => {
                 responseMessage = responseMsg
                 const messageBot = new Message({ conversationId, bot : true, text: responseMsg})
@@ -56,7 +64,7 @@ class MessageController {
             });
             res.json({ success: true, messages: responseMessage })
         } catch (error) {
-            res.status(500).json({ success: false, messages: error.message})
+            res.status(500).json({ success: false, messages: error.message })
         }
     }
 
@@ -68,7 +76,7 @@ class MessageController {
             if (!message) return res.json({ success: false, messages: 'Cant update message' })
             res.json({ success: true, messages: 'Update successfully ' })
         } catch (error) {
-            res.status(500).json({ success: false, messages: error.message })
+            res.status(500).json({ success: false, messages: 'Interval server error' })
         }
     }
 

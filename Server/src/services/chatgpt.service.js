@@ -20,7 +20,6 @@ class ChatGPTService {
                 fullPrompt += message.bot ? `Green: ${message.botMessage}\n\n` : `Người dùng: ${message.botMessage}\n\n`;
             }
         }
-
         fullPrompt += `Người dùng: ${prompt}\n`;
         fullPrompt += `Green: `;
 

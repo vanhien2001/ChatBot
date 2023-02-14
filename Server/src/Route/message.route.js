@@ -4,6 +4,7 @@ const messageController = require("../Controller/message.controller");
 
 router.get("/", messageController.showAll);
 router.get("/:id", messageController.show);
+router.post("/botReponse", messageController.botReponse);
 router.post("/store", messageController.store);
 router.put("/:id", messageController.update);
 router.delete("/:id", messageController.delete);

@@ -37,7 +37,7 @@ const Register = () => {
                 Register Account
             </div>
             <form
-                className="w-1/2 mx-auto mt-10"
+                className="w-1/2 mx-auto mt-10 max-[768px]:w-10/12"
                 method="POST"
                 onSubmit={(e) => {
                     e.preventDefault();

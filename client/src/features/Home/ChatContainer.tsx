@@ -6,6 +6,7 @@ import {
     faTrash,
     faCheck,
     faXmark,
+    faChevronLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en";
@@ -21,6 +22,7 @@ import {
     getAll,
     addmessage,
     requestBot,
+    clearData,
 } from "../../store/reducers/messageSlice";
 import { useAppSelector, useAppDispatch } from "../../store";
 
@@ -71,6 +73,7 @@ const ChatContainer = () => {
     const onDelete = () => {
         dispatch(deleteConversation(conversationId))
             .then(() => dispatch(setConversation("")))
+            .then(() => dispatch(clearData()))
             .then(() =>
                 dispatch(getAllConversations(user?._id ? user._id : ""))
             );
@@ -89,6 +92,11 @@ const ChatContainer = () => {
             {conversationId ? (
                 <div className="px-10 py-5 text-text_color border-solid border-b-2 border-text_color2 chat flex items-center justify-between">
                     <div className="text-text_color3">
+                        <FontAwesomeIcon
+                            icon={faChevronLeft}
+                            className="hidden max-[768px]:inline-block mr-5 hover:text-green"
+                            onClick={() => dispatch(setConversation(""))}
+                        />
                         {
                             conversations.find(
                                 (index) => index._id == conversationId
@@ -126,7 +134,7 @@ const ChatContainer = () => {
             ) : (
                 ""
             )}
-            <div className="flex-1 flex flex-col overflow-y-auto px-5 border-solid border-b-2 border-text_color2">
+            <div className="flex-1 flex flex-col overflow-y-auto px-5 border-solid border-b-2 border-text_color2 pt-5">
                 {!conversationId ? (
                     <div className="px-10 py-5 text-text_color h-full flex items-center justify-center">
                         <div className="">
@@ -227,7 +235,14 @@ const ChatContainer = () => {
                     ""
                 )}
             </div>
-            <div className="h-24 flex justify-center items-center chat">
+            <form
+                className="h-24 flex justify-center items-center chat max-[768px]:px-5"
+                method="POST"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    sendMessage(text);
+                }}
+            >
                 <input
                     type="text"
                     className={`text-text_color2 bg-input_bac w-10/12 px-5 py-2 rounded-md outline-none border-solid border-2 border-input_back focus:border-green ${
@@ -239,15 +254,16 @@ const ChatContainer = () => {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     disabled={messageLoading || !conversationId}
+                    required
                 />
                 <button
-                    className={`text-text_color w-20 rounded-md bg-green2 h-10 ml-5 hover:bg-green hover:text-text_color3 ${
+                    type="submit"
+                    className={`text-text_color w-20 rounded-md h-10 ml-5 hover:bg-green hover:text-text_color3 ${
                         messageLoading || !conversationId
                             ? "cursor-not-allowed"
                             : ""
-                    }`}
+                    } ${text ? "bg-green text-text_color3" : "bg-green2"}`}
                     disabled={messageLoading || !conversationId}
-                    onClick={() => sendMessage(text)}
                 >
                     {messageLoading ? (
                         <FontAwesomeIcon
@@ -258,7 +274,7 @@ const ChatContainer = () => {
                         <FontAwesomeIcon icon={faPaperPlane} />
                     )}
                 </button>
-            </div>
+            </form>
         </div>
     );
 };

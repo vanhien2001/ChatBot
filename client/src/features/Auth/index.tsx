@@ -24,10 +24,10 @@ const Auth = () => {
     }, [user]);
     return (
         <div className="flex items-center justify-center h-screen bg-green relative overflow-hidden">
-            <ChatbotSvg className="absolute left-5 -top-20 w-4/12"/>
-            <ChatSvg className="absolute right-5 -bottom-24 w-3/12"/>
+            <ChatbotSvg className="absolute left-5 -top-20 w-4/12 max-[768px]:w-6/12 max-[768px]:-top-36"/>
+            <ChatSvg className="absolute right-5 -bottom-24 w-3/12 max-[768px]:hidden"/>
             {/* <TypingSvg className="absolute right-20 -top-40 w-72"/> */}
-            <div className="container w-1/2 rounded-3xl bg-bg_back py-10">
+            <div className="container w-1/2 rounded-3xl bg-bg_back py-10 max-[768px]:w-10/12">
                 <div className="text-text_color3 text-center text-2xl font-semibold ">
                     Welcome Back !
                 </div>

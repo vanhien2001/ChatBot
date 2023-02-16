@@ -64,7 +64,7 @@ class MessageController {
             });
             res.json({ success: true, messages: responseMessage })
         } catch (error) {
-            res.status(500).json({ success: false, messages: error.message })
+            res.status(500).json({ success: false, messages: error.message, data: req.body })
         }
     }
 

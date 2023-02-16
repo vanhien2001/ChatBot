@@ -43,7 +43,11 @@ const initialState: defaultState = {
 const messageSlice = createSlice({
     name: 'message',
     initialState,
-    reducers: {},
+    reducers: {
+        clearData(state) {   
+            state.messages = [];
+        },
+    },
     extraReducers: (builder) => {
         builder.addCase(getAll.pending, (state, action) => {
             state.messageLoading = true;
@@ -86,5 +90,7 @@ const messageSlice = createSlice({
 const messageReducer = messageSlice.reducer;
 
 export const messageSelector = (state : RootState) => state.messageReducer;
+
+export const { clearData } = messageSlice.actions;
 
 export default messageReducer;

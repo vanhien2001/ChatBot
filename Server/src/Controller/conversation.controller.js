@@ -12,6 +12,11 @@ class ConversationController {
                         $match: {
                             userId: mongoose.Types.ObjectId(userId)
                         }
+                    },
+                    {
+                        $sort : {
+                            createdAt: -1
+                        }
                     }
                 ])
             }

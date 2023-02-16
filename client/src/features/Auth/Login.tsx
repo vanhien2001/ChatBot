@@ -41,7 +41,7 @@ const Login = () => {
                 Sign In
             </div>
             <form
-                className="w-1/2 mx-auto mt-5"
+                className="w-1/2 mx-auto mt-5 max-[768px]:w-10/12"
                 method="POST"
                 onSubmit={(e) => {
                     e.preventDefault();

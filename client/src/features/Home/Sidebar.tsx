@@ -11,6 +11,7 @@ import {
     getAll,
     setConversation,
     addConversation,
+    clearMessage,
 } from "../../store/reducers/conversationSlice";
 import {
     messageSelector,
@@ -18,11 +19,12 @@ import {
 } from "../../store/reducers/messageSlice";
 import { userSelector, logout } from "../../store/reducers/userSlice";
 import { useAppSelector, useAppDispatch } from "../../store";
+import Notify from "../../components/Notify";
 
 const Sidebar = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { conversationLoading, conversations } =
+    const { conversationLoading, conversations, message } =
         useAppSelector(conversationSelector);
     const { messageLoading, messages } = useAppSelector(messageSelector);
     const { user } = useAppSelector(userSelector);
@@ -37,10 +39,6 @@ const Sidebar = () => {
 
     const onSubmit = () => {
         if (user) {
-            console.log({
-                userId: user._id ? user._id : "",
-                name: conversationName,
-            });
             dispatch(
                 addConversation({
                     userId: user._id ? user._id : "",
@@ -59,6 +57,12 @@ const Sidebar = () => {
     };
 
     useEffect(() => {
+        if (message) {
+            setTimeout(() => dispatch(clearMessage()), 3000);
+        }
+    }, [message]);
+
+    useEffect(() => {
         if (user) {
             dispatch(getAll(user._id ? user._id : ""));
         }
@@ -66,6 +70,7 @@ const Sidebar = () => {
 
     return (
         <div className="bg-bg_back px-5 pt-5 text-text_color h-screen flex justify-between flex-col">
+            {message ? <Notify data={message} /> : ""}
             <div className="border-solid border-b-2 border-text_color2 flex-1">
                 <div className="mx-auto text-3xl text-center text-text_color3">
                     Chat Bot
@@ -85,7 +90,14 @@ const Sidebar = () => {
                     ""
                 )}
                 {showConversationAdd ? (
-                    <div className="my-10">
+                    <form
+                        className="my-10"
+                        method="POST"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            onSubmit();
+                        }}
+                    >
                         <input
                             type="text"
                             className="w-full bg-bg_back border-solid border-2 border-text_color px-5 py-2 rounded-md outline-none"
@@ -94,11 +106,12 @@ const Sidebar = () => {
                             onChange={(e) =>
                                 setConversationName(e.target.value)
                             }
+                            required
                         />
                         <div className="flex justify-between mt-5">
                             <button
-                                className="px-5 py-2 rounded-md border-solid border-2 border-text_color2 bg-green2 w-5/12 hover:bg-green hover:text-text_color3"
-                                onClick={onSubmit}
+                                type="submit"
+                                className={`px-5 py-2 rounded-md border-solid border-2 border-text_color2 w-5/12 hover:bg-green hover:text-text_color3 ${conversationName ? 'bg-green text-text_color3' : 'bg-green2 '}`}
                             >
                                 {conversationLoading ? (
                                     <FontAwesomeIcon
@@ -109,14 +122,14 @@ const Sidebar = () => {
                                     "Add"
                                 )}
                             </button>
-                            <button
+                            <div
                                 className="text-center py-2 rounded-md w-5/12 border-solid border-2 border-text_color2 hover:bg-red hover:text-text_color3"
                                 onClick={() => setShowConversationAdd(false)}
                             >
                                 Cancel
-                            </button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
                 ) : (
                     ""
                 )}

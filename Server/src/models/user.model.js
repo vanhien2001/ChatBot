@@ -12,10 +12,7 @@ const User = new Schema(
             type: String,
             required: true
         },
-        firstname: {
-            type: String,
-        },
-        lastname: {
+        name: {
             type: String,
         },
     },

@@ -45,18 +45,26 @@ interface defaultState {
     conversationLoading: boolean;
     conversations: IConversationData[];
     conversationId: string;
+    message: null | {
+        success: Boolean;
+        messages: string;
+    };
 }
 
 const initialState: defaultState = {
     conversationLoading: false,
     conversations: [],
     conversationId: '',
+    message: null,
 };
 
 const conversationSlice = createSlice({
     name: "conversation",
     initialState,
     reducers: {
+        clearMessage(state) {   
+            state.message = null;
+        },
         setConversation(state, action: PayloadAction<string>){
             console.log(action.payload)
             state.conversationId = action.payload
@@ -77,19 +85,22 @@ const conversationSlice = createSlice({
         builder.addCase(deleteConversation.pending, (state, action) => {
             state.conversationLoading = true;
         });
-        builder.addCase(deleteConversation.fulfilled, (state, action) => {
+        builder.addCase(deleteConversation.fulfilled, (state, action: { payload: any }) => {
+            state.message = action.payload
             state.conversationLoading = false;
         });
         builder.addCase(addConversation.pending, (state, action) => {
             state.conversationLoading = true;
         });
-        builder.addCase(addConversation.fulfilled, (state, action) => {
+        builder.addCase(addConversation.fulfilled, (state, action: { payload: any }) => {
+            state.message = action.payload
             state.conversationLoading = false;
         });
         builder.addCase(editConversation.pending, (state, action) => {
             state.conversationLoading = true;
         });
-        builder.addCase(editConversation.fulfilled, (state, action) => {
+        builder.addCase(editConversation.fulfilled, (state, action: { payload: any }) => {
+            state.message = action.payload
             state.conversationLoading = false;
         });
     },
@@ -100,6 +111,6 @@ const conversationReducer = conversationSlice.reducer;
 export const conversationSelector = (state: RootState) =>
     state.conversationReducer;
 
-export const { setConversation } = conversationSlice.actions;
+export const { setConversation, clearMessage } = conversationSlice.actions;
 
 export default conversationReducer;
